@@ -6,4 +6,4 @@
 #$ -pe orte 2
 #$ -j y
 #$ -l h_rt=00:30:00
-mpirun -np 2 Rscript buildMpiSparrowNet.R "testData.csv" 2 "/shared/CMC/CMCSPARROW"
+mpirun -np 2 Rscript buildMpiSparrowNet.R "testData.csv" 1 "/shared/CMC/CMCSPARROW"
