@@ -390,7 +390,7 @@ for (i in 1:max(res$membership)){
 
 s2 <- colnames(sparrowSVA$driverMat)[-which(clus$membership!=1)]
 
-
+#test
 
 makeDigraph <- function(G,name,graphfile){
   cat('graph',name,'{\n',file=graphfile)
