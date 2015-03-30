@@ -4,4 +4,4 @@ cd /shared/metanetwork
 git pull
 cd ../
 R CMD INSTALL metanetwork
-cd /CMC/CMCSPARROW
+cd /shared/CMC/CMCSPARROW
