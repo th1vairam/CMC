@@ -34,3 +34,9 @@ top50stats.netstats
 nosva
 sva
 testData.csv
+bpData.csv
+bpDataSVA.csv
+controlData.csv
+controlDataSVA.csv
+sczData.csv
+sczDataSVA.csv
