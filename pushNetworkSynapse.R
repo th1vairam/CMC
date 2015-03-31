@@ -33,4 +33,3 @@ act <- Activity(name = paste0(method,' ',disease,' network analysis'),
 act <- storeEntity(act)
 generatedBy(synNet) <- act
 synNet <- synStore(synNet)
-                
