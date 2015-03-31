@@ -28,7 +28,7 @@ synSetAnnotations(synNet) <- networkAnnotation
 
 act <- Activity(name = paste0(method,' ',disease,' network analysis'),
                 used = list(list(entity=synGene,wasExecuted=FALSE),list(entity=synTF,wasExecuted=FALSE),list(entity=synMeta,wasExecuted=FALSE))
-                executed=list("https://github.com/blogsdon/CMCSPARROW/blob/master/grabCMCdata.sh",""))
+                executed=list("https://github.com/blogsdon/CMCSPARROW/blob/master/grabCMCdata.sh","https://github.com/blogsdon/CMCSPARROW/blob/master/runcmcsparrow.sh"))
 
 act <- storeEntity(act)
 generatedBy(synNet) <- act
