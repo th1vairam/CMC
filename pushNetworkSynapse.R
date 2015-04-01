@@ -9,8 +9,8 @@ synGene=as.character(commandArgs(TRUE)[[5]])
 synTF=as.character(commandArgs(TRUE)[[6]])
 synMeta=as.character(commandArgs(TRUE)[[7]])
 
-load('result.rda')
-write.csv(result,file=file,quote=F)
+#load('result.rda')
+#write.csv(result,file=file,quote=F)
 parentId <- 'syn3455061'
 synNet <- File(file,parentId=parentId)
 
