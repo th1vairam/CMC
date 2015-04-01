@@ -6,7 +6,7 @@ disease=as.character(commandArgs(TRUE)[[2]])
 normalization=as.character(commandArgs(TRUE)[[3]])
 method=as.character(commandArgs(TRUE)[[4]])
 synGene=as.character(commandArgs(TRUE)[[5]])
-synTF=as.charcter(commandArgs(TRUE)[[6]])
+synTF=as.character(commandArgs(TRUE)[[6]])
 synMeta=as.character(commandArgs(TRUE)[[7]])
 
 load('result.rda')
