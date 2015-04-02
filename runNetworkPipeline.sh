@@ -15,7 +15,7 @@
 
 #v whether or not sva normalization was run
 #p project id of where to upload results
-#b table id of where to upload network statistics
+#n number of cores in cluster
 
 sparrow=0
 aracne=0
@@ -26,8 +26,11 @@ genie3=0
 tigress=0
 sva=0
 
-while getopts ":y:c:p:sawlrgtv" opt; do
+while getopts ":d:y:c:p:n:sawlrgtv" opt; do
   case $opt in
+    d)
+      dataFile=$OPTARG
+      ;;
     y)
       synapseIdFile=$OPTARG
       ;;
@@ -61,6 +64,9 @@ while getopts ":y:c:p:sawlrgtv" opt; do
     p)
       projectId=$OPTARG
       ;;
+    n)
+      numberCore=$OPTARG
+      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
@@ -71,6 +77,8 @@ while getopts ":y:c:p:sawlrgtv" opt; do
       ;;
   esac
 done
+
+echo "dataFile: $dataFile"
 echo "synapseIdFile: $synapseIdFile"
 echo "codeUrlFile: $codeUrlFile"
 echo "sparrow: $sparrow"
@@ -82,3 +90,45 @@ echo "genie3: $genie3"
 echo "tigress: $tigress"
 echo "sva: $sva"
 echo "projectId: $projectId"
+echo "numberCore: $numberCore"
+
+#$ -S /bin/bash
+#$ -V
+#$ -cwd
+#$ -N Job1
+#$ -pe orte $numberCore
+
+#if sparrow:
+if [ $sparrow -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if aracne
+if [ $aracne -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if wgcna
+if [ $wgcna -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if lasso
+if [ $lasso -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if ridge
+if [ $ridge -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if genie3
+if [ $genie3 -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
+
+#if tigress
+if [ $tigress -eq "1" ]; then
+  mpirun -np 1 Rscript buildMpiSparrowNet.R $dataFile $((numberCore-1)) "/shared/CMC/CMCSPARROW/"
+fi
