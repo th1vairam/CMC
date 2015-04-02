@@ -17,10 +17,49 @@
 #p project id of where to upload results
 #b table id of where to upload network statistics
 
-while getopts ":y:c:p:b:sawlrgtv" opt; do
+sparrow=0
+aracne=0
+wgcna=0
+lasso=0
+ridge=0
+genie3=0
+tigress=0
+sva=0
+
+while getopts ":y:c:p:sawlrgtv" opt; do
   case $opt in
     y)
-      echo "test y" >&2
+      synapseIdFile=$OPTARG
+      ;;
+    c)
+      codeUrlFile=$OPTARG
+      ;;
+    s)
+      sparrow=1
+      ;;
+    a)
+      aracne=1
+      ;;
+    w)
+      wgcna=1
+      ;;
+    l)
+      lasso=1
+      ;;
+    r)
+      ridge=1
+      ;;
+    g)
+      genie3=1
+      ;;
+    t)
+      tigress=1
+      ;;
+    v)
+      sva=1
+      ;;
+    p)
+      projectId=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -32,3 +71,14 @@ while getopts ":y:c:p:b:sawlrgtv" opt; do
       ;;
   esac
 done
+echo "synapseIdFile: $synapseIdFile"
+echo "codeUrlFile: $codeUrlFile"
+echo "sparrow: $sparrow"
+echo "aracne: $aracne"
+echo "wgcna: $wgcna"
+echo "lasso: $lasso"
+echo "ridge: $ridge"
+echo "genie3: $genie3"
+echo "tigress: $tigress"
+echo "sva: $sva"
+echo "projectId: $projectId"
