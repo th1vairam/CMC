@@ -36,4 +36,4 @@ colnames(OM) <- cn
 write.csv(Y,file=file,quote=F)
 write.csv(OM,file='truth.csv',quote=F)
 cat('syn3157146','syn3157148',file='syn.txt',sep='\n')
-cat('https://github.com/blogsdon/CMC/blob/master/simulation.R','')
+cat('https://github.com/blogsdon/CMC/blob/master/simulation.R','https://github.com/blogsdon/CMC/blob/master/testpipelinesim.sh',file='code.txt',sep='\n')
