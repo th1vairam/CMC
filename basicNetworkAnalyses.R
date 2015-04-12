@@ -8,13 +8,12 @@ loadData <- function(syn){
   load(synMeta@filePath)
   return(network)
 }
-
+require(metaNet)
 networks <- sapply(res$file.id,loadData)
-
-hubs <- sapply(networks,function(x){return(rowSums(x))})
-
-colnames(hubs) <- res$file.method
 names(networks) <- res$file.method
+#netStat
+netStats <- sapply(networks,networkStatistics)
+colnames(hubs) <- res$file.method
 library(biomaRt)
 ensembl = useDataset("hsapiens_gene_ensembl",mart=ensembl)
 
