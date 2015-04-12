@@ -13,13 +13,8 @@ networks <- sapply(res$file.id,loadData)
 
 hubs <- sapply(networks,function(x){return(rowSums(x))})
 
-
-
-
-
 colnames(hubs) <- res$file.method
-
-
+names(networks) <- res$file.method
 library(biomaRt)
 ensembl = useDataset("hsapiens_gene_ensembl",mart=ensembl)
 
