@@ -47,8 +47,8 @@ enrichRes <- apply(geneRanksName,2,enrichmentPath,schizophreniaHits)
 enrichResPval <- sapply(enrichRes,function(x) return(-log10(as.numeric(x$pval))))
 
 
-matplot(1:5000,enrichResPval[1:5000,],'l',lwd=3)
-legend('topleft',colnames(enrichResPval),col=c(1:6,1),lty=1:7,lwd=2,cex=.5)
+matplot(1:5000,enrichResPval[1:5000,],'l',lwd=3,xlab='Ranked Hubs',ylab='-log10 p-value',main='Enrichment for PGC2 GWAS LOCI based on hubness')
+legend('topleft',colnames(enrichResPval),col=c(1:6,1),lty=1:7,lwd=2,cex=.6)
 
 
 #get differentially expressed genes
@@ -61,10 +61,10 @@ targetListDEens <- as.character(deSynFile$genes[1:488])
 enrichResDe <- apply(geneRanksName,2,enrichmentPath,targetListDE)
 enrichResPvalDE <- sapply(enrichResDe,function(x) return(-log10(as.numeric(x$pval))))
 
-matplot(1:16423,enrichResPvalDE,'l',lwd=3)
-legend('topleft',colnames(enrichResPvalDE),col=c(1:6,1),lty=1:7,lwd=2,cex=.5)
+matplot(1:5000,enrichResPvalDE[1:5000,],'l',lwd=3,xlab='Ranked Hubs',ylab='-log10 pvalue',main='Enrichment for DE genes based on hubness')
+legend('topright',colnames(enrichResPvalDE),col=c(1:6,1),lty=1:7,lwd=2,cex=.6)
 
-
+pairs(netStats[,3:9],pch=16,col='grey')
 def <- synTableQuery('SELECT * FROM syn3546459')
 def@values$isGWAS <- netStats$GeneId%in%schizophreniaHits
 def@values$isDE <- netStats$EnsemblId%in%targetListDEens
@@ -77,3 +77,18 @@ defMethod <- def@values[,c('sparrow','wgcna','aracne','genie3')]
 a3 <- rowSums(defMethod)
 plot(a3)
 def@values <- cbind(def@values,a3)
+
+
+geneIdForNetwork <- netStats$GeneId
+geneIdForNetwork[geneIdForNetwork=='.'] <- netStats$EnsemblId[geneIdForNetwork=='.']
+
+makeSparseNetworkFile(network = networks[[1]]%>%as.matrix(), geneId = geneIdForNetwork, file='~/Desktop/sparrowNet.csv')
+
+
+a3 <- read.csv('~/Desktop/sparrowNetworkStatistics.csv',row.names=9,stringsAsFactors=FALSE)
+a4 <- names(sort(a3$Stress,decreasing=T))
+rankedList <- rownames(a3)[order(a3$BetweennessCentrality,decreasing=T)]
+rankedList <- c(rankedList,setdiff(netStats$GeneId,rankedList))
+blah <- enrichmentPath(rankedList = rankedList,targetList = schizophreniaHits)
+plot(-log10(as.numeric(blah$pval))[1:2000])
+
