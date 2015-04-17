@@ -48,3 +48,7 @@ combMetzelerWoutersTomassonNKAML.tar.gz
 combMetzlerWoutersTomassonNKAML.csv
 milesNKAML.csv
 milesNKAML.tar.gz
+ARACNE
+contrib
+dataMatrix.tsv
+result_aracne.rda
