@@ -1,8 +1,9 @@
 #### Function to measure different node ranking metrics ####
 nodeRankings <- function(g,
                          metrics = c('inDegree','outDegree','totalDegree','betwenness','clustCoefficient',
-                                     'closeness','alpha','pageRank','nearNeighbor')){
+                                     'closeness','eigen','pageRank','nearNeighbor')){
   
+  require(igraph)
   results <- data.frame(row.names=V(g)$name)
   
   # In degree
@@ -23,7 +24,7 @@ nodeRankings <- function(g,
                                 normalized = T)
   }
   
-  # Total degree
+  # Total degree: An important node is involved in a large number of interactions
   if (any(metrics %in% 'totalDegree')){
     results$totalDegree <- degree(g,
                                   v=V(g), 
@@ -32,7 +33,7 @@ nodeRankings <- function(g,
                                   normalized = T)
   }
   
-  # Betwenness centrality
+  # Betwenness centrality: An important node will lie on a high proportion of paths between other nodes in the network.
   if (any(metrics %in% 'betwenness')){
     results$betweenness <- betweenness(g,
                                        v= V(g),
@@ -52,23 +53,25 @@ nodeRankings <- function(g,
                                       vids=V(g))$knn
   }
   
-  # Page Rank
+  # Page Rank:  An important node is likely to receive more connections from other nodes.
   if (any(metrics %in% 'pageRank')){
     results$pageRank <- page.rank(g,
                                   vids = V(g))$vector
   }
   
-  # Alpha centrality
+  # Eigen centrality: An important node is connected to important neighbours.
   if (any(metrics %in% 'alpha')){
-    results$alpha <- alpha.centrality(g,
-                                                nodes=V(g))
+    results$eigen <- alpha.centrality(g,
+                                      nodes=V(g))
   }
   
-  # Closeness centrality
+  # Closeness centrality: An important node is typically “close” to, and can communicate quickly with, the other nodes in the network
   if (any(metrics %in% 'closeness')){
     results$closeness <- closeness(g,
                                    v= V(g),
                                    mode = 'all',
                                    normalized = T)
   }
+  
+  return(results)
 }

@@ -1,7 +1,9 @@
 #### Function to obtain basic network properties ####
 networkProperties <- function(g,
-                              metrics = c('density','diameter','avgNodeDegree','avgPathLength','avgClusteringCoefficient','centralisation')){
+                              metrics = c('density','diameter','avgNodeDegree','avgPathLength',
+                                          'avgClusteringCoefficient','centralisation')){
   
+  require(igraph)
   results <- list()
   
   # Density: Shows how sparse or dense a network is, for full network the value is 1 and for empty network the value is NaN(0/0)
