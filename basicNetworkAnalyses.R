@@ -92,3 +92,32 @@ rankedList <- c(rankedList,setdiff(netStats$GeneId,rankedList))
 blah <- enrichmentPath(rankedList = rankedList,targetList = schizophreniaHits)
 plot(-log10(as.numeric(blah$pval))[1:2000])
 
+#####run some quick analyses on what Thanneer generated
+res2 <- synTableQuery('select * from syn3546459')
+
+
+networkStat <- synQuery('select name,id from file where projectId==\'syn3455058\' and networkStatistic==1')
+
+newTable <- res2@values
+newTable2 <- vector('list',7)
+i <- 1
+for (i in 1:nrow(networkStat)){
+  synObj <- synGet(networkStat$file.id[i])
+  newTable2[[i]] <- read.delim(synObj@filePath,row.names=1)
+}
+names(newTable2) <- c('aracne','genie3','lasso','ridge','sparrow','tigress','wgcna')
+
+
+getGeneList<-function(x,g){
+  return(g[order(x,decreasing=T)])
+}
+
+metaGetGeneList <- function(X,g){
+  return(apply(X,2,getGeneList,g))
+}
+
+masterList <- lapply(newTable2,metaGetGeneList,newTable$GeneId)
+
+pgc2 <- newTable$GeneId[ newTable$isGWAS==TRUE]
+
+enrichRes2 <- lapply(masterList,function(x,y) apply(x,2,enrichmentPath,pgc2), pgc2)
