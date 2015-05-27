@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 #simulate some data
 Rscript simulation.R 100 100 0.02 "data.csv"
 cd ../metanetworkSynapse/
