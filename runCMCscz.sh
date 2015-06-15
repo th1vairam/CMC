@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#rm code.txt
+rm codeScz.txt
 #rm syn.txt
 #rm synSVA.txt
 
@@ -13,8 +13,8 @@
 #echo "syn2757138" >> syn.txt
 #echo "syn2757140" >> syn.txt
 
-#echo "https://github.com/blogsdon/CMC/blob/master/runCMCcontrols.sh" >> code.txt
-#echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> code.txt
+echo "https://github.com/blogsdon/CMC/blob/master/runCMCcontrols.sh" >> codeScz.txt
+echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> codeScz.txt
 
 cd ../metanetworkSynapse/
 qsub -v dataFile="../CMC/sczData.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=159,outputpath="/shared/CMC/sczNetworks/nosva/" -pe orte 159 buildNet.sh
