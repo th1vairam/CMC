@@ -19,8 +19,8 @@ echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> codeScz.txt
 cd ../metanetworkSynapse/
 qsub -v dataFile="../CMC/sczData.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=159,outputpath="/shared/CMC/sczNetworks/nosva/" -pe orte 159 buildNet.sh
 qsub -v dataFile="../CMC/sczDataSVA.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=159,outputpath="/shared/CMC/sczNetworks/sva/" -pe orte 159 buildNet.sh
-qsub -v dataFile="../CMC/sczData.csv",pathv="/shared/metanetworkSynapse/",aracne=1,aracneFull=1,correlation=1,correlationBonferroni=1,correlationFDR=1,wgcna=1,numberCore=1,numberCore=1,outputpath="/shared/CMC/sczNetworks/nosva/" -pe orte 1 buildNet.sh
-qsub -v dataFile="../CMC/sczDataSVA.csv",pathv="/shared/metanetworkSynapse/",aracne=1,aracneFull=1,correlation=1,correlationBonferroni=1,correlationFDR=1,wgcna=1,numberCore=1,numberCore=1,outputpath="/shared/CMC/sczNetworks/sva/" -pe orte 1 buildNet.sh
+qsub -v dataFile="../CMC/sczData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,aracneFull=1,correlation=1,correlationBonferroni=1,correlationFDR=1,wgcna=1,numberCore=1,outputpath="/shared/CMC/sczNetworks/nosva/" -pe orte 1 buildNet.sh
+qsub -v dataFile="../CMC/sczDataSVA.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,aracneFull=1,correlation=1,correlationBonferroni=1,correlationFDR=1,wgcna=1,numberCore=1,outputpath="/shared/CMC/sczNetworks/sva/" -pe orte 1 buildNet.sh
 
 
 #qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,correlation=1,numberCore=8 -pe orte 8 buildNet.sh
