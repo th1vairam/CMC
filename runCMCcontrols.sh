@@ -17,8 +17,9 @@ echo "https://github.com/blogsdon/CMC/blob/master/runCMCcontrols.sh" >> code.txt
 echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> code.txt
 
 cd ../metanetworkSynapse/
-qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=160 -pe orte 160 buildNet.sh
-qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,correlation=1,numberCore=8 -pe orte 8 buildNet.sh
-./pushNet.sh -a "syn3526285" -b "../CMC/code.txt" -c "../CMC/syn.txt" -defghijklmnopq -r "SVA" -s "HomoSapiens" -t "Schizophrenia" -u "DorsolateralPrefrontalCortex"
+qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=160,outputpath="/shared/CMC/controlNetworks/nosva/" -pe orte 160 buildNet.sh
+qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=160,outputpath="/shared/CMC/controlNetworks/sva/" -pe orte 160 buildNet.sh
+#qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,correlation=1,numberCore=8 -pe orte 8 buildNet.sh
+#./pushNet.sh -a "syn3526285" -b "../CMC/code.txt" -c "../CMC/syn.txt" -defghijklmnopq -r "SVA" -s "HomoSapiens" -t "Schizophrenia" -u "DorsolateralPrefrontalCortex"
 #./cleanNet.sh
 
