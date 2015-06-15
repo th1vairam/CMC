@@ -1,20 +1,20 @@
 #!/bin/bash
 
-rm code.txt
-rm syn.txt
-rm synSVA.txt
+#rm code.txt
+#rm syn.txt
+#rm synSVA.txt
 
 #./grabCMCdata.sh
-echo "syn2757147" >> synSVA.txt
-echo "syn2757149" >> synSVA.txt
-echo "syn2299154" >> synSVA.txt
+#echo "syn2757147" >> synSVA.txt
+#echo "syn2757149" >> synSVA.txt
+#echo "syn2299154" >> synSVA.txt
 
-echo "syn2299154" >> syn.txt
-echo "syn2757138" >> syn.txt
-echo "syn2757140" >> syn.txt
+#echo "syn2299154" >> syn.txt
+#echo "syn2757138" >> syn.txt
+#echo "syn2757140" >> syn.txt
 
-echo "https://github.com/blogsdon/CMC/blob/master/runCMCcontrols.sh" >> code.txt
-echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> code.txt
+#echo "https://github.com/blogsdon/CMC/blob/master/runCMCcontrols.sh" >> code.txt
+#echo "https://github.com/blogsdon/CMC/blob/master/grabCMCdata.sh" >> code.txt
 
 cd ../metanetworkSynapse/
 qsub -v dataFile="../CMC/sczData.csv",pathv="/shared/metanetworkSynapse/",sparrow1=1,sparrow2=1,lassoCV1se=1,lassoCV1min=1,lassoAIC=1,lassoBIC=1,ridgeCV1se=1,ridgeCV1min=1,ridgeAIC=1,ridgeBIC=1,genie3=1,tigress=1,numberCore=159,outputpath="/shared/CMC/sczNetworks/nosva/" -pe orte 159 buildNet.sh
