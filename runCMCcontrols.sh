@@ -26,6 +26,14 @@ qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/CMC/controlNetworks/
 qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,sparrow2Z=1,lassoCVmin=1,ridgeCVmin=1,numberCore=159,outputpath="/shared/CMC/controlNetworks/nosva/" -pe orte 159 buildNet.sh
 qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,sparrow2Z=1,lassoCVmin=1,ridgeCVmin=1,numberCore=159,outputpath="/shared/CMC/controlNetworks/sva/" -pe orte 159 buildNet.sh
 
+
+#new submissions
+qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,sparrow2Z=1,lassoCVmin=1,ridgeCVmin=1,numberCore=479,outputpath="/shared/CMC/controlNetworks/nosva/" -pe orte 479 buildNet.sh
+qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,lassoAIC=1,numberCore=479,outputpath="/shared/CMC/controlNetworks/sva/" -pe orte 479 buildNet.sh
+
+
+
+
 #qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,correlation=1,numberCore=8 -pe orte 8 buildNet.sh
 #./pushNet.sh -a "syn3526285" -b "../CMC/code.txt" -c "../CMC/syn.txt" -defghijklmnopq -r "SVA" -s "HomoSapiens" -t "Schizophrenia" -u "DorsolateralPrefrontalCortex"
 #./cleanNet.sh
