@@ -31,7 +31,7 @@ qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/metanetworkSynapse/"
 qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,sparrow2Z=1,lassoCVmin=1,ridgeCVmin=1,numberCore=479,outputpath="/shared/CMC/controlNetworks/nosva/" -pe orte 479 buildNet.sh
 qsub -v dataFile="../CMC/controlDataSVA.csv",pathv="/shared/metanetworkSynapse/",sparrowZ=1,lassoAIC=1,numberCore=479,outputpath="/shared/CMC/controlNetworks/sva/" -pe orte 479 buildNet.sh
 
-
+qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/",ridgeCVmin=1,numberCore=543,outputpath="/shared/CMC/controlNetworks/nosva/" -pe orte 543 buildNet.sh
 
 
 #qsub -v dataFile="../CMC/controlData.csv",pathv="/shared/metanetworkSynapse/ARACNE/",aracne=1,correlation=1,numberCore=8 -pe orte 8 buildNet.sh
