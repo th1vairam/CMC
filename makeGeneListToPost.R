@@ -40,8 +40,11 @@ makeGeneListToPost <- function(gene_de,tf_de,syn1,name1,disease,testNet){
 
 
 #control sva
+#makeGeneListToPost('syn2757151','syn2757153','syn3526286','geneNameKeySVA.csv','Control','/shared/CMC/controlNetworks/sva/result_lassoBIC.rda')
 
 #scz
+#makeGeneListToPost('syn2757142','syn2757144','syn3526289','geneNameKeyNoSVA.csv','Schizophrenia','/shared/CMC/sczNetworks/nosva/result_lassoBIC.rda')
+
 
 #scz sva
-
+makeGeneListToPost('syn2757151','syn2757153','syn4549880','geneNameKeySVA.csv','Schizophrenia','/shared/CMC/sczNetworks/sva/result_lassoBIC.rda')
