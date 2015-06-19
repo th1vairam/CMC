@@ -27,7 +27,7 @@ makeGeneListToPost <- function(gene_de,tf_de,syn1,name1,disease,testNet){
                disease=disease,
                organism='HomoSapiens')
   synSetAnnotations(synObj) <- anno;
-  act <- Activity(name='Gene Key for Networks',used=as.list(c(gene_de,tf_de)),executed = as.list(c(https://github.com/blogsdon/CMC/blob/master/makeGeneListToPost.R)))
+  act <- Activity(name='Gene Key for Networks',used=as.list(c(gene_de,tf_de)),executed = as.list(c('https://github.com/blogsdon/CMC/blob/master/makeGeneListToPost.R')))
   act <- storeEntity(act)
   generatedBy(synObj) <- act
   
