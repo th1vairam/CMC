@@ -16,8 +16,9 @@ makeGeneListToPost <- function(gene_de,tf_de,syn1,name1,disease,testNet){
   }
   
   n3 <- c(tf_de_obj2$MAPPED_genes,gene_de_obj2$MAPPED_genes)
-  nameKey <- cbind(n2,n3)
-  colnames(nameKey) <- c('ensemblId','geneId')
+  n4 <- as.character(1:length(n3))
+  nameKey <- cbind(n2,n3,n4)
+  colnames(nameKey) <- c('ensemblId','geneName','variableNumber')
   #name1 <- 'geneNameKeyNoSVA.csv'
   write.csv(nameKey,quote=F,row.names=F,file=name1)
   #syn1 <- 'syn3526290'
