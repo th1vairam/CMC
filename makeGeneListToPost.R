@@ -35,7 +35,7 @@ makeGeneListToPost <- function(gene_de,tf_de,syn1,name1,disease,testNet){
 }
 
 #control
-#makeGeneListToPost('syn2757142','syn2757144','syn3526290','geneNameKeyNoSVA.csv','Control','/shared/CMC/controlNetworks/nosva')
+#makeGeneListToPost('syn2757142','syn2757144','syn3526290','geneNameKeyNoSVA.csv','Control','/shared/CMC/controlNetworks/nosva/result_lassoBIC.rda')
 
 
 #control sva
