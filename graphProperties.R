@@ -1,40 +1,62 @@
-#  Entry point for basic graph theoretic metrics
+## Entry point for basic graph theoretic metrics
+
+# Load required libraries
 require(igraph)
 require(synapseClient)
+require(data.table)
+require(stringr)
+require(tools)
+
+# Needs the dev branch
+library(rGithubClient)
+
 synapseLogin()
 
-# Source iGraph files
+# Source required local R files
 source('./networkProperties.R')
 source('./nodeRankings.R')
+source('./calcNodePropertiesAndStore.R')
+source('./rownameToFirstColumn.R')
 
-# Query to get all network files in rda (sparse) format
-Networks <- synQuery('select name,id,method from file where projectId==\'syn3455058\' and matrixType==\'sparse\'')
+# Get current commit from Github
+thisFileName <- 'graphProperties.R'
 
-graphProperties <- function(Networks){
-  # load network   
-  netFile <- synGet(as.character(Networks['file.id']))
-  load(netFile@filePath)
+# Github link
+thisRepo <- getRepo(repository = "th1vairam/CMC", 
+                    ref="branch", 
+                    refName="master")
+
+thisFile <- getPermlink(repository = thisRepo,
+                        repositoryPath=paste0('code/Rmd/', thisFileName))
+
+# Select input folder ids and properties to compute
+Input_IDs = c('syn3526290', 'syn3526286', 'syn3526289', 'syn4549880')
+Properties = c('totalDegree', 'clustCoefficient', 'pageRank', 'betwenness', 'nearNeighbor', 'eigen', 'closeness')
+
+# Compute metrics
+Results = list()
+for (property in Properties) # Evaluate loop for each property
+  for (id in Input_IDs){ # Evaluate loop for each ids
+    # Query to get all network files
+    Networks <- synQuery(paste0('select * from file where parentId=="',id,'"'))
+
+    # Create results folder
+    Folder_OBJ = Folder(name = 'Node Metrics', parentId = id)
+    Folder_OBJ = synStore(Folder_OBJ)
+    
+    # Get gene name mapping file
+    GeneNames_OBJ = synGet(Networks$file.id[grep('geneName',Networks$file.name)])
+    GeneNames = fread(GeneNames_OBJ@filePath, data.table=F)
+    rownames(GeneNames) = GeneNames$variableNumber
   
-  # convert adjacency to graph
-  graph <- graph.adjacency(network,weighted=T,mode='directed',diag=F)
-  
-  # calculate node centralities
-  centralityMetrics <- nodeRankings(graph)
-  centralityMetrics$geneNames <- row.names(centralityMetrics)
-  centralityMetrics <- centralityMetrics[,c(dim(centralityMetrics)[2],1:(dim(centralityMetrics)[2]-1))]
-  
-  # write to file
-  write.table(centralityMetrics,file=paste(Networks['file.method'],'Schizophrenia_SVA_nodeRankings.tsv',sep='_'),
-              sep = '\t', col.names=T,row.names=F,quote=F)
-  Files <- File(paste(Networks['file.method'],'Schizophrenia_SVA_nodeRankings.tsv',sep='_'),
-                name= paste(Networks['file.method'],'Schizophrenia SVA nodeRankings',sep=' '),
-                parentId = 'syn3455058')
-  
-  # set Annotations
-  synAnnotations <- c(networkProperties(graph),annotations(netFile)@annotations@stringAnnotations)
-  synAnnotations$fileType <- 'tsv'
-  annotations(Files) <- synAnnotations
-  
-  # store in synapse
-  File <- synStore(File,used=netFile,executed=c(),activityName='Node Ranking Metrics Calculation')
-}
+    # Extract networks ids to evaluate
+    File.IDs = Networks$file.id[!is.na(Networks$file.method)]
+    
+    Results[[property]][[id]] = lapply(File.IDs, 
+                                       calcNodePropertiesAndStore, 
+                                       property, 
+                                       GeneNames,
+                                       parentId = Folder_OBJ$properties$id,
+                                       used = GeneNames_OBJ, 
+                                       executed = thisFile)
+  }
