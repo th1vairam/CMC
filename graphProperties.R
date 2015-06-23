@@ -27,11 +27,11 @@ thisRepo <- getRepo(repository = "th1vairam/CMC",
                     refName="master")
 
 thisFile <- getPermlink(repository = thisRepo,
-                        repositoryPath=paste0('code/Rmd/', thisFileName))
+                        repositoryPath=paste0('', thisFileName))
 
 # Select input folder ids and properties to compute
-Input_IDs = c('syn3526290', 'syn3526286', 'syn3526289', 'syn4549880')
-Properties = c('totalDegree', 'clustCoefficient', 'pageRank', 'betwenness', 'nearNeighbor', 'eigen', 'closeness')
+Input_IDs = c('syn3526290', 'syn3526286', 'syn3526289', 'syn4549880');#
+Properties = c( 'totalDegree', 'nearNeighbor', 'pageRank', 'clustCoefficient', 'betwenness', 'eigen', 'closeness');# 
 
 # Compute metrics
 Results = list()
@@ -39,7 +39,7 @@ for (property in Properties) # Evaluate loop for each property
   for (id in Input_IDs){ # Evaluate loop for each ids
     # Query to get all network files
     Networks <- synQuery(paste0('select * from file where parentId=="',id,'"'))
-
+    
     # Create results folder
     Folder_OBJ = Folder(name = 'Node Metrics', parentId = id)
     Folder_OBJ = synStore(Folder_OBJ)
@@ -48,15 +48,16 @@ for (property in Properties) # Evaluate loop for each property
     GeneNames_OBJ = synGet(Networks$file.id[grep('geneName',Networks$file.name)])
     GeneNames = fread(GeneNames_OBJ@filePath, data.table=F)
     rownames(GeneNames) = GeneNames$variableNumber
-  
-    # Extract networks ids to evaluate
-    File.IDs = Networks$file.id[!is.na(Networks$file.method)]
     
-    Results[[property]][[id]] = lapply(File.IDs, 
-                                       calcNodePropertiesAndStore, 
-                                       property, 
-                                       GeneNames,
-                                       parentId = Folder_OBJ$properties$id,
-                                       used = GeneNames_OBJ, 
-                                       executed = thisFile)
+    # Extract networks ids to evaluate
+    File.IDs = Networks$file.id[!is.na(Networks$file.method) & Networks$file.method != 'sparsity']
+    
+    for (file.id in File.IDs){
+      Results = calcNodePropertiesAndStore(file.id,
+                                           property,
+                                           GeneNames,
+                                           parentId = Folder_OBJ$properties$id,
+                                           used = GeneNames_OBJ, 
+                                           executed = thisFile)
+    }
   }
