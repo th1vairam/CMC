@@ -14,11 +14,11 @@ library(synapseClient)
 synapseLogin()
 
 # Get all files and folder
-All.Files = synQuery('select name,id,disease from file where projectId=="syn3455058" and fileType == "rda"')
-Finished.Files = synQuery('select name,id,disease from file where projectId=="syn3455058" and fileType == "tsv" and moduleMethod == "igraph:fast_greedy"')
+All.Files = synQuery('select name,id,disease,normalization from file where projectId=="syn3455058" and fileType == "rda"')
+Finished.Files = synQuery('select name,id,disease,normalization from file where projectId=="syn3455058" and fileType == "tsv" and moduleMethod == "igraph:fast_greedy"')
 
-All.Files = All.Files[!(paste(tools::file_path_sans_ext(All.Files$file.name),All.Files$file.disease) %in%
-                          paste(sapply(Finished.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Finished.Files$file.disease)),]
+All.Files = All.Files[!(paste(tools::file_path_sans_ext(All.Files$file.name),All.Files$file.disease,All.Files$file.normalization) %in%
+                          paste(sapply(Finished.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Finished.Files$file.disease, Finished.Files$file.normalization)),]
 
 # Make directory and write shell scripts for running these files
 system('mkdir sgeModuleSubmissions')

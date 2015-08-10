@@ -48,7 +48,11 @@ parentId = NET_OBJ$properties$parentId
 load(NET_OBJ@filePath)
 
 # Convert lnetwork to igraph graph object
-g = igraph::graph.adjacency(network, mode = 'undirected', weighted = NULL, diag = F)
+if (exists('sparseNetwork')){
+	g = igraph::graph.adjacency(sparseNetwork, mode = 'undirected', weighted = NULL, diag = F);
+} else {
+	g = igraph::graph.adjacency(network, mode = 'undirected', weighted = NULL, diag = F);
+}
 
 # Get modules using fast.greedy method (http://arxiv.org/abs/cond-mat/0408187)
 mod = igraph::fastgreedy.community(g)
