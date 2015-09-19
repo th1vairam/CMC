@@ -8,7 +8,7 @@ args = commandArgs(TRUE)
 cat("\014")
 
 # Clear R workspace
-setwd('/mnt/Work/Github/CMC/R/')
+setwd('/home/ec2-user/Work/Github/CMC/R/')
 
 # Load libraries
 library(synapseClient)

@@ -5,7 +5,7 @@
 cat("\014")
 
 # Clear R workspace
-setwd('/mnt/Work/Github/CMC/R/')
+setwd('/home/ec2-user/Work/Github/CMC/R/')
 
 # Load libraries
 library(synapseClient)
@@ -29,18 +29,18 @@ fp_all = file(paste('sgeModuleSubmissions/allSubmissions.sh'),'w+')
 cat('#!/bin/bash',file=fp_all,sep='\n')
 close(fp_all)
 for (id in UModule.Files$file.id){
-  fp = file (paste('/mnt/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,sep='.'), "w+")
+  fp = file (paste('/home/ec2-user/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,sep='.'), "w+")
   cat('#!/bin/bash', 
       'sleep 30', 
-      paste('Rscript /mnt/Work/Github/CMC/R/sgeModuleSubmissions/getModules.fastGreedy.R',id), 
+      paste('Rscript /home/ec2-user/Work/Github/CMC/R/getModules.fastGreedy.R',id), 
       file = fp,
       sep = '\n')
   close(fp)
   
   fp_all = file(paste('sgeModuleSubmissions/allSubmissions.sh'),'a+')    
-  cat(paste('qsub','-cwd','-V','-l h_vmem=13G', '-l mem_free=13G', paste('/mnt/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,sep='.'),
-            '-o',paste('/mnt/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,'o',sep='.'),
-            '-e',paste('/mnt/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,'e',sep='.')),
+  cat(paste('qsub','-cwd','-V','-l h_vmem=7G', '-l mem_free=7G', paste('/home/ec2-user/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,sep='.'),
+            '-o',paste('/home/ec2-user/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,'o',sep='.'),
+            '-e',paste('/home/ec2-user/Work/Github/CMC/R/sgeModuleSubmissions/SUB',id,'e',sep='.')),
       file = fp_all,
       sep = '\n')
   close(fp_all)
