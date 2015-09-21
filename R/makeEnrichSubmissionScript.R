@@ -9,16 +9,24 @@ setwd('/home/ec2-user/Work/Github/CMC/R')
 
 # Load libraries
 library(synapseClient)
+library(dplyr)
 
 # login to synapse
 synapseLogin()
 
 # Get all files and folder
-All.Files = synQuery('select name,id,disease,normalization from file where projectId=="syn3455058" and fileType == "tsv" and moduleMethod == "igraph:fast_greedy"')
-Finished.Files = synQuery('select name,id,disease,normalization from file where projectId=="syn3455058" and fileType == "tsv" and algo == "Fisher"')
+All.Files = synQuery('select * from file where projectId=="syn3455058" and fileType == "tsv" and sparsityMethod != "correlationFDR" and sparsityMethod != "wgcna"', blockSize = 100)
+All.Files = All.Files$collectAll()
 
-All.Files = All.Files[!(paste(tools::file_path_sans_ext(All.Files$file.name),All.Files$file.disease,All.Files$file.normalization) %in%
-                          paste(sapply(Finished.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Finished.Files$file.disease, Finished.Files$file.normalization)),]
+# Get module files
+Module.Files = dplyr::filter(All.Files, is.na(file.enrichmentMethod) & file.moduleMethod == "igraph:fast_greedy" & file.sparsityMethod != "correlationFDR" & file.sparsityMethod != "wgcna")
+
+# Get all enrichment files
+Enrich.Files = dplyr::filter(All.Files, file.enrichmentMethod == "Fisher")
+
+# Unfinished enrichment files
+UEnrich.Files = Module.Files[!(paste(sapply(Module.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Module.Files$file.disease) %in%
+                                 paste(sapply(Enrich.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Enrich.Files$file.disease)),]
 
 # Make directory and write shell scripts for running these files
 system('mkdir sgeEnrichSubmissions')

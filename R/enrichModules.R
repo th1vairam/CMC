@@ -91,6 +91,12 @@ parentId = MOD_OBJ$properties$parentId
 
 # Load modules 
 MOD = data.table::fread(MOD_OBJ@filePath, data.table=F)
+
+# Convert modules with size less than 20 to NoModule
+change.mods = dplyr::count(MOD, factor(modulelabels)) %>% dplyr::filter(n < 20)
+ind = (MOD$modulelabels %in% change.mods$"factor(modulelabels)")
+MOD$moduleNumber[ind] = 0
+MOD$modulelabels[ind] = 'NoModule'
 ################################################################################################
 
 ################################################################################################
@@ -210,5 +216,5 @@ ENR_OBJ = synStore(ENR_OBJ,
                    activityDescription = activityDescription)
 
 # Write completed files to synapse
-write.table(ENR_OBJ$properties$id, file = 'CompletedModuleIDs.txt', sep='\n', append=T, quote=F, col.names=F, row.names=F)
+write.table(ENR_OBJ$properties$id, file = 'CompletedEnrichmentIDs.txt', sep='\n', append=T, quote=F, col.names=F, row.names=F)
 writeLines(paste('Completed',FNAME,'and stored in',ENR_OBJ$properties$id))
