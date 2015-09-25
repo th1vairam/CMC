@@ -15,25 +15,24 @@ library(dplyr)
 synapseLogin()
 
 # Get all files and folder
-All.Files = synQuery('select * from file where projectId=="syn3455058" and fileType == "tsv" and sparsityMethod != "correlationFDR" and sparsityMethod != "wgcna"', blockSize = 100)
+All.Files = synQuery('select * from file where projectId=="syn3455058" and fileType == "tsv" and method == "rankconsensus" and sparsityMethod != "correlationFDR" and sparsityMethod != "wgcna"', blockSize = 100)
 All.Files = All.Files$collectAll()
 
 # Get module files
-Module.Files = dplyr::filter(All.Files, is.na(file.enrichmentMethod) & file.moduleMethod == "igraph:fast_greedy" & file.sparsityMethod != "correlationFDR" & file.sparsityMethod != "wgcna")
+Module.Files = dplyr::filter(All.Files, is.na(file.enrichmentMethod) & file.moduleMethod == "igraph:fast_greedy" & file.method == "rankconsensus")
 
 # Get all enrichment files
-Enrich.Files = dplyr::filter(All.Files, file.enrichmentMethod == "Fisher")
+Enrich.Files = dplyr::filter(All.Files, file.enrichmentMethod == "Fisher" & file.method == "rankconsensus")
 
 # Unfinished enrichment files
-UEnrich.Files = Module.Files[!(paste(sapply(Module.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Module.Files$file.disease) %in%
-                                 paste(sapply(Enrich.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Enrich.Files$file.disease)),]
+UEnrich.Files = Module.Files;#[!(paste(sapply(Module.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Module.Files$file.disease) %in% paste(sapply(Enrich.Files$file.name, function(x){strsplit(x," ")[[1]][1]}), Enrich.Files$file.disease)),]
 
 # Make directory and write shell scripts for running these files
 system('mkdir sgeEnrichSubmissions')
 fp_all = file(paste('sgeEnrichSubmissions/allSubmissions.sh'),'w+')    
 cat('#!/bin/bash',file=fp_all,sep='\n')
 close(fp_all)
-for (id in All.Files$file.id){
+for (id in UEnrich.Files$file.id){
   fp = file (paste('/home/ec2-user/Work/Github/CMC/R/sgeEnrichSubmissions/SUB',id,sep='.'), "w+")
   cat('#!/bin/bash', 
       'sleep 30', 

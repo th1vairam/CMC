@@ -9,16 +9,17 @@ cat("\014")
 
 # Clear R workspace
 setwd('/home/ec2-user/Work/Github/CMC/R')
+############################################################################################################
 
-################################################################################################
-#### Load libraries ####
+############################################################################################################
+#### Libraries ####
 library(synapseClient)
-library(data.table)
 library(dplyr)
 library(WGCNA)
 library(tools)
 library(stringr)
 library(igraph)
+library(data.table)
 library(biomaRt)
 
 # Needs the dev branch
@@ -46,6 +47,73 @@ activityName = 'Module enrichment'
 activityDescription = 'Enrichment analysis of network modules using hypergeometric method'
 ################################################################################################
 
+############################################################################################################
+#### Function definitions ####
+# Function to filter Gene Sets
+filterGeneSets <- function(GeneLists, # List of lists
+                           genesInBackground, # background set of genes
+                           minSize = 10,
+                           maxSize = 1000){
+  GeneLists = lapply(GeneLists, 
+                     function(x, genesInBackground){
+                       x = lapply(x, 
+                                  function(x, genesInBackground){
+                                    return(intersect(x, genesInBackground))
+                                  },
+                                  genesInBackground)
+                       return(x)
+                     }, 
+                     genesInBackground)
+  
+  GeneLists = lapply(GeneLists, 
+                     function(x, minSize, maxSize){
+                       len = sapply(x, length)
+                       x = x[len>minSize & len<maxSize]
+                       return(x)
+                     },
+                     minSize,
+                     maxSize)
+  len = sapply(GeneLists, length)
+  GeneLists = GeneLists[len != 0]
+  
+  return(GeneLists)
+}
+
+# Function to perform Fishers enrichment analysis
+fisherEnrichment <- function(genesInSignificantSet, # A character vector of differentially expressed or some significant genes to test
+                             genesInGeneSet, # A character vector of genes in gene set like GO annotations, pathways etc...
+                             genesInBackground # Background genes that are 
+){
+  genesInSignificantSet = intersect(genesInSignificantSet, genesInBackground) # back ground filtering
+  genesInNonSignificantSet = base::setdiff(genesInBackground, genesInSignificantSet)
+  genesInGeneSet = intersect(genesInGeneSet, genesInBackground) # back ground filtering
+  genesOutGeneSet = base::setdiff(genesInBackground,genesInGeneSet)
+  
+  pval = fisher.test(
+    matrix(c(length(intersect(genesInGeneSet, genesInSignificantSet)),             
+             length(intersect(genesInGeneSet, genesInNonSignificantSet)),
+             length(intersect(genesOutGeneSet, genesInSignificantSet)),
+             length(intersect(genesOutGeneSet, genesInNonSignificantSet))), 
+           nrow=2, ncol=2),
+    alternative="greater")
+  OR = (length(intersect(genesInGeneSet, genesInSignificantSet)) * length(intersect(genesOutGeneSet, genesInNonSignificantSet))) / (length(intersect(genesInGeneSet, genesInNonSignificantSet)) * length(intersect(genesOutGeneSet, genesInSignificantSet)))
+  return(data.frame(pval = pval$p.value,
+                    ngenes = length(genesInGeneSet),
+                    noverlap = length(intersect(genesInGeneSet, genesInSignificantSet)),
+		    OR = OR 
+		   )
+	)
+}
+
+# Function to convert rownames to first column of a df
+rownameToFirstColumn <- function(DF,colname){
+  DF <- as.data.frame(DF)
+  DF[,colname] <- row.names(DF)
+  DF <- DF[,c(dim(DF)[2],1:(dim(DF)[2]-1))]
+  return(DF)
+}
+############################################################################################################
+
 ################################################################################################
 #### Get gene list ####
 # Download enrichr gene sets
@@ -62,9 +130,34 @@ GeneSets.Scz = lapply(GL_SZH_ID, function(id){
   tmp1 = lapply(tmp$symBeforeOverlap, function(x){return(unique(strsplit(x,'\\|')[[1]]))});
   names(tmp1) = tmp$Name
   return(tmp1)
-  })
+})
 
 GeneSets = c(GeneSets,GeneSets.Scz)
+
+DE = c(SVA = 'syn3493887', NO.SVA = 'syn3493992', SVA.ISOFORM = 'syn3356190', NO.SVA.ISOFORM = 'syn3356061')
+ALL_USED_IDs = c(ALL_USED_IDs, DE)
+DE.RESULTS = lapply(DE, function(id){
+  tmp = fread(synGet(id)@filePath, data.table=F, header=T)
+  tmp = filter(tmp, adj.P.Val <= 0.05) %>% dplyr::select(MAPPED_genes) %>% unlist %>% unique
+})
+GeneSets = c(GeneSets, list(CMC.DExp = DE.RESULTS))
+
+RTC.SHERLOCK.SVA.GENE = fread(synGet('syn3359263')@filePath, data.table=F, header=T)
+RTC.SHERLOCK.SVA.GENE = RTC.SHERLOCK.SVA.GENE %>% dplyr::select(Name, symAfterOverlap)
+GeneSets.rtc.gene = lapply(RTC.SHERLOCK.SVA.GENE$symAfterOverlap, function(x){
+  return(str_split(x, "\\|") %>% unlist %>% unique)
+}) 
+names(GeneSets.rtc.gene) = RTC.SHERLOCK.SVA.GENE$Name
+
+RTC.SHERLOCK.SVA.ISOFORM = fread(synGet('syn3578134')@filePath, data.table=F, header=T)
+RTC.SHERLOCK.SVA.ISOFORM = RTC.SHERLOCK.SVA.ISOFORM %>% dplyr::select(Name, symAfterOverlap)
+GeneSets.rtc.isoform = lapply(RTC.SHERLOCK.SVA.ISOFORM$symAfterOverlap, function(x){
+  return(str_split(x, "\\|") %>% unlist %>% unique)
+}) 
+names(GeneSets.rtc.isoform) = RTC.SHERLOCK.SVA.ISOFORM$Name
+
+GeneSets = c(GeneSets, list(RTC.SHERLOCK.GENES = GeneSets.rtc.gene, RTC.SHERLOCK.ISOFORMS = GeneSets.rtc.isoform))
+ALL_USED_IDs = c(ALL_USED_IDs, 'syn3359263', 'syn3578134')
 
 gsets = c("Achilles_fitness_decrease", "Achilles_fitness_increase", "Allen_Brain_Atlas_down", "Allen_Brain_Atlas_up",
           "BioCarta", "CMAP_down", "CMAP_up", "Cancer_Cell_Line_Encyclopedia", "ChEA", "Cross_Species_Phenotype",
@@ -77,8 +170,9 @@ gsets = c("Achilles_fitness_decrease", "Achilles_fitness_increase", "Allen_Brain
           "Phosphatase_Substrates_from_DEPOD", "Reactome", "SILAC_Phosphoproteomics", "TF-LOF_Expression_from_GEO", 
           "TargetScan_microRNA", "Tissue_Protein_Expression_from_Human_Proteome_Map", "Tissue_Protein_Expression_from_ProteomicsDB",
           "Transcription_Factor_PPIs", "Virus_Perturbations_from_GEO_down", "Virus_Perturbations_from_GEO_up", "WikiPathways_2015",
-          "GENEANNOT.ASD", "GENEANNOT.SCZ", "GENEFAMILY", "SCZ.GENETICS")
+          "GENEANNOT.ASD", "GENEANNOT.SCZ", "GENEFAMILY", "SCZ.GENETICS", "CMC.DExp", "RTC.SHERLOCK.GENES", "RTC.SHERLOCK.ISOFORMS")
 GeneSets = GeneSets[gsets]
+
 ################################################################################################
 
 ################################################################################################
@@ -109,112 +203,69 @@ backGroundGenes = unique(ensg2hgnc$hgnc_symbol)
 MOD = merge(MOD, ensg2hgnc, by.x = 'GeneIDs', by.y = 'ensembl_gene_id', all.x=T)
 ################################################################################################
 
-################################################################################################
+############################################################################################################
 #### Filter gene list ####
-# Function to filter Gene Sets
-filterGeneSets <- function(GeneLists, # List of lists
-                           genesInBackground, # background set of genes
-                           minSize = 10,
-                           maxSize = 1000){
-  GeneLists = lapply(GeneLists, 
-                     function(x, genesInBackground){
-                       x = lapply(x, 
-                                  function(x, genesInBackground){
-                                    return(intersect(x, genesInBackground))
-                                  },
-                                  genesInBackground)
-                       return(x)
-                     }, 
-                     genesInBackground)
-  
-  GeneLists = lapply(GeneLists, 
-                     function(x, minSize, maxSize){
-                       len = sapply(x, length)
-                       x = x[len>minSize && len<maxSize]
-                       return(x)
-                     },
-                     minSize,
-                     maxSize)
-  len = sapply(GeneLists, length)
-  GeneLists = GeneLists[len != 0]
-  
-  return(GeneLists)
-}
+GeneSets = filterGeneSets(GeneSets,  backGroundGenes, minSize = 10, maxSize = 1000)
+############################################################################################################
 
-GeneSets = filterGeneSets(GeneSets, backGroundGenes)
-################################################################################################
-
-################################################################################################
-#### Enrichment Analysis ####
-# Function to perform Fishers enrichment analysis
-fisherEnrichment <- function(genesInSignificantSet, # A character vector of differentially expressed or some significant genes to test
-                             genesInGeneSet, # A character vector of genes in gene set like GO annotations, pathways etc...
-                             genesInBackground # Background genes that are 
-){
-  genesInSignificantSet = intersect(genesInSignificantSet, genesInBackground) # back ground filtering
-  genesInNonSignificantSet = base::setdiff(genesInBackground, genesInSignificantSet)
-  genesInGeneSet = intersect(genesInGeneSet, genesInBackground) # back ground filtering
-  genesOutGeneSet = base::setdiff(genesInBackground,genesInGeneSet)
-  
-  pval = fisher.test(
-    matrix(c(length(intersect(genesInGeneSet, genesInSignificantSet)),             
-             length(intersect(genesInGeneSet, genesInNonSignificantSet)),
-             length(intersect(genesOutGeneSet, genesInSignificantSet)),
-             length(intersect(genesOutGeneSet, genesInNonSignificantSet))), 
-           nrow=2, ncol=2),
-    alternative="greater")
-  return(data.frame(pval = pval$p.value,
-                    ngenes = length(genesInGeneSet),
-                    noverlap = length(intersect(genesInGeneSet, genesInSignificantSet))))
-}
-
-rownameToFirstColumn <- function(DF,colname){
-  DF <- as.data.frame(DF)
-  DF[,colname] <- row.names(DF)
-  DF <- DF[,c(dim(DF)[2],1:(dim(DF)[2]-1))]
-  return(DF)
-}
-
+############################################################################################################
+#### Perform enrichment analysis ####
+# Perform enrichment analysis (for modules greater than 20 genes only)
 enrichResults = list()
 for (name in unique(MOD$modulelabels)){
   genesInModule = unique(MOD$hgnc_symbol[MOD$modulelabels == name])  
-  tmp = lapply(GeneSets,
-               function(x, genesInModule, genesInBackground){
-                 tmp = as.data.frame(t(sapply(x, fisherEnrichment, genesInModule, genesInBackground)))
-                 tmp$pval = p.adjust(tmp$pval,'fdr')
-                 tmp = rownameToFirstColumn(tmp,'GeneSetName')
-                 return(tmp)
-               },
-               unique(genesInModule), unique(backGroundGenes))
-  
-  for (name1 in names(tmp))
-    tmp[[name1]]$category = name1
-  
-  enrichResults[[name]] = do.call(rbind,tmp)
+  if (length(genesInModule) > 20){
+    tmp = lapply(GeneSets,
+                 function(x, genesInModule, genesInBackground){
+                   tmp = as.data.frame(t(sapply(x, fisherEnrichment, genesInModule, genesInBackground)))
+                   tmp = rownameToFirstColumn(tmp,'GeneSetName')
+                   return(tmp)
+                 },
+                 unique(genesInModule), unique(backGroundGenes))
+    
+    for (name1 in names(tmp))
+      tmp[[name1]]$category = name1
+    
+    enrichResults[[name]] = as.data.frame(rbindlist(tmp))
+    enrichResults[[name]]$fdr = p.adjust(enrichResults[[name]]$pval, 'fdr')
+  } else {
+    enrichResults[[name]] = data.frame(GeneSetName = NA, pval = NA, ngenes = NA, noverlap = NA, OR = NA, category = NA, fdr = NA)
+  }
   writeLines(paste0('Completed ',name))  
 }
 
 # Write results to file
 for(name in names(enrichResults))
-  enrichResults[[name]]$ModuleName = name
-enrichmentResults = do.call(rbind,enrichResults)
+  enrichResults[[name]]$ComparisonName = name
+enrichmentResults = as.data.frame(rbindlist(enrichResults))
 enrichmentResults$ngenes = unlist(enrichmentResults$ngenes)
 enrichmentResults$noverlap = unlist(enrichmentResults$noverlap)
-write.table(enrichmentResults, file = 'enrichmentResults.tsv', sep='\t', row.names=F, quote=F)
-collectGarbage()
+enrichmentResults$fdr = unlist(enrichmentResults$fdr)
+enrichmentResults$OR = unlist(enrichmentResults$OR)
+enrichmentResults$pval = unlist(enrichmentResults$pval)
 
+write.table(enrichmentResults, file = paste(gsub(' ','_',FNAME),'enrichmentResults.tsv',sep='_'), sep='\t', row.names=F)
+collectGarbage()
+############################################################################################################
+
+############################################################################################################
+#### Write to synapse ####
 # Write results to synapse
 algo = 'Fisher'
-ENR_OBJ = File('enrichmentResults.tsv', name = paste(FNAME,algo), parentId = parentId)
+ENR_OBJ = File(paste(gsub(' ','_',FNAME),'enrichmentResults.tsv',sep='_'), name = paste(FNAME,algo), parentId = parentId)
 annotations(ENR_OBJ) = annotations(MOD_OBJ)
 ENR_OBJ@annotations$fileType = 'tsv'
 ENR_OBJ@annotations$enrichmentMethod = 'Fisher'
+ENR_OBJ@annotations$enrichmentGeneSet = 'Enrichr and SCZ'
 ENR_OBJ = synStore(ENR_OBJ, 
                    executed = thisFile,
-                   used = ALL_USED_IDs,
+                   used = as.character(ALL_USED_IDs),
                    activityName = activityName,
                    activityDescription = activityDescription)
+############################################################################################################
 
+############################################################################################################
 # Write completed files to synapse
 write.table(ENR_OBJ$properties$id, file = 'CompletedEnrichmentIDs.txt', sep='\n', append=T, quote=F, col.names=F, row.names=F)
 writeLines(paste('Completed',FNAME,'and stored in',ENR_OBJ$properties$id))
+############################################################################################################
